@@ -1,7 +1,7 @@
 {
   "name": "baloot-pay",
   "version": "0.0.1",
-  "description": "",
+  "description": "A payment operations platform built with NestJS, PostgreSQL, Prisma, and payment provider APIs.",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
