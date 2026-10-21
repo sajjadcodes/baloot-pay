@@ -20,17 +20,18 @@ All tenant-owned resources must have a defined ownership relationship.
 
 ## 7.2 Authenticated tenant context
 
-Authentication and tenant identity are provided by the already-deployed multi-tenant authentication service. Baloot Pay must integrate with that service's documented trust contract rather than create a local authentication module, credential store, or duplicate user/tenant identity system.
+Authentication is provided by the already-deployed [Baloot Auth service](https://github.com/sajjadcodes/baloot-auth). Its current documented principal contains `userId`, `clientId`, and `sessionId`; `clientId` selects an Auth client and is not automatically a payment tenant identifier. Baloot Pay must integrate with the deployed service's verified trust contract rather than create a local authentication module, credential store, or duplicate Auth user/session identity system.
 
 The payment service must:
 
-- Accept identity, tenant, and permission claims only after verifying them using the approved integration contract.
+- Accept identity only after verification using the approved Auth integration contract.
+- Resolve the Baloot Pay tenant and payment permissions through an explicit, reviewed mapping/policy; do not infer them from Auth `clientId` or caller-supplied fields.
 - Bind each request to a verified tenant context and enforce resource ownership in application services.
-- Fail closed if the identity is missing, invalid, expired, revoked, or cannot be verified according to the service contract.
+- Fail closed if the identity is missing, invalid, expired, revoked, or cannot be verified according to the service contract. If verification is remote, define availability, timeout, and caching behavior without weakening revocation requirements.
 - Avoid persisting authentication secrets or copying the external service's credential lifecycle into payment tables.
 - Keep authorization for Baloot Pay payment operations explicit; successful authentication alone does not authorize access to every payment or operation.
 
-The exact protocol, claim names, key/token validation, revocation behavior, and administrative access boundary must be confirmed before implementation.
+The exact deployed version, API/transport integration, browser and machine-client flows, tenant mapping, permission source, revocation behavior, and administrative access boundary must be confirmed before implementation. Do not share Auth signing keys or query its database directly as an unreviewed shortcut.
 
 ## 7.3 Payment
 

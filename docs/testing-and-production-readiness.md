@@ -62,7 +62,7 @@ Also test rejected payments, authentication failures, duplicate requests, timeou
 - A stale webhook arrives after a newer state is recorded.
 - Two partial refunds race.
 - A tenant guesses another tenant's payment ID.
-- A revoked API credential is reused.
+- A revoked authentication session is reused.
 - A provider returns an unexpected amount or currency.
 - A worker processes the same outbox item twice.
 - A database connection fails during a state transition.

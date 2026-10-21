@@ -35,11 +35,11 @@ No real payment credentials, live transactions, or production launch are permitt
 
 Treat each numbered step below as a small implementation/review increment, not permission to execute database commands. The phase checklists that follow provide additional detail.
 
-1. **Baseline and scope:** Inventory the current NestJS app, scripts, tests, and deployment assumptions. Confirm the first provider, countries/currencies, tenant model, the deployed multi-tenant authentication service's integration contract, card-data flow, expected traffic, availability/latency objectives, and applicable compliance questions. Record unresolved decisions; do not guess.
+1. **Baseline and scope:** Inventory the current NestJS app, scripts, tests, and deployment assumptions. Confirm the first provider, countries/currencies, tenant model, the deployed [Baloot Auth service](https://github.com/sajjadcodes/baloot-auth) version and integration contract, card-data flow, expected traffic, availability/latency objectives, and applicable compliance questions. Record unresolved decisions; do not guess.
 2. **Application safety foundation:** Establish strict configuration validation, consistent error mapping, request/correlation IDs, redacted structured logging, request/body limits, security headers, explicit CORS policy where needed, and liveness/readiness behavior. Add tests for invalid configuration and failure responses.
 3. **Prisma 8 and PostgreSQL design:** Verify official Prisma 8 compatibility and usage, select supported packages/adapters, define database environments and least-privilege roles, and review the initial schema/migration plan. Keep any schema/client-generation execution behind the approval boundary above.
 4. **Persistence foundation:** After the schema and exact operation are approved, implement the tenant and provider-account foundations, durable identifiers, database constraints, indexes, and repository integration tests. Verify behavior against PostgreSQL, not only mocks.
-5. **Authentication integration and tenant authorization:** Integrate with the already-deployed multi-tenant authentication service using its supported protocol. Do not build a local authentication module, user/tenant identity store, credential issuance/rotation flow, or duplicate authentication service. Map only verified identity, tenant, and permission claims into payment-service authorization; enforce object-level ownership checks here. Test missing, malformed, expired, revoked, insufficient-scope, and cross-tenant credentials and resource IDs.
+5. **Authentication integration and tenant authorization:** Integrate with the already-deployed Baloot Auth service only after its caller types and verification contract are confirmed. It documents HttpOnly browser cookies, bearer access-token extraction, and a `userId`/`clientId`/`sessionId` principal; Auth `clientId` is not automatically the Baloot Pay business tenant. Do not build a local authentication module, duplicate Auth users/sessions/credentials, or share its signing secret/database as a shortcut. Resolve the approved browser/API and service-to-service flows, tenant mapping, and payment authorization source before implementation. Test missing, malformed, expired, revoked, unavailable-service, insufficient-permission, and cross-tenant credentials and resource IDs.
 6. **Payment domain and read/create APIs:** Add exact money/currency validation, domain state transitions, API contracts, stable errors, idempotency, event history, and tenant-scoped queries. Test boundary amounts, malformed inputs, duplicate/concurrent requests, and illegal transitions.
 7. **Durable provider submission:** Implement a single documented provider adapter and transactional outbox. Exercise provider success/rejection, timeouts after possible processing, malformed responses, retries, worker crashes, duplicate delivery, and recovery without duplicate charges.
 8. **Webhooks and refunds:** Add provider-specific signature/replay verification, durable inbox/deduplication, out-of-order event handling, and only provider-supported capture/cancel/refund flows. Test forged/replayed events, webhook races, refund limits, and concurrent partial refunds.
@@ -69,7 +69,11 @@ Tasks:
 - [ ] Confirm the supported Node.js, NestJS, Prisma, and PostgreSQL versions.
 - [ ] Define the initial payment provider and integration capabilities.
 - [ ] Define the initial countries and currencies.
-- [ ] Document the deployed multi-tenant authentication service contract, verified tenant/permission claims, token validation, revocation behavior, failure behavior, and availability dependency.
+- [ ] Review the deployed Baloot Auth version, Swagger contract, and official integration documentation; record its actual principal fields and token/session validation behavior.
+- [ ] Decide how browser cookie-authenticated clients reach the payment API without assuming host-only Auth cookies are sent to another host; preserve CSRF protections.
+- [ ] Decide whether direct machine-to-machine callers are in scope; the documented bearer extraction is not by itself a machine credential-issuance contract.
+- [ ] Define the trusted mapping from Auth user/client context to Baloot Pay tenant and payment permissions. Do not treat `clientId` as a business `tenantId` without an explicit reviewed decision.
+- [ ] Define Auth dependency timeout, outage, fail-closed, observability, and any revocation-consistent caching policy.
 - [ ] Define realistic expected traffic, peak/burst behavior, latency objectives, availability objectives, and test environments; do not invent pass/fail thresholds.
 - [ ] Document payment lifecycle and financial invariants.
 - [ ] Define the intended card-data handling model.
@@ -79,7 +83,7 @@ Tasks:
 - [ ] Write initial architecture decision records in `docs/decisions/`.
 - [ ] Create an initial threat model in `docs/threat-model/`.
 
-**Completion gate:** No unresolved decision is silently assumed where it affects financial correctness, security, provider compatibility, database safety, or load-test acceptance criteria.
+**Completion gate:** No unresolved decision is silently assumed where it affects financial correctness, security, provider compatibility, database safety, load-test acceptance criteria, or Auth-to-payment tenant/permission mapping.
 
 If a critical decision is missing, Copilot must document the blocker and ask for clarification rather than implement an invented behavior.
 
@@ -131,16 +135,17 @@ Tasks:
 
 **Completion gate:** Database constraints enforce critical invariants, migrations are reproducible, and concurrent operations cannot violate tested financial rules.
 
-## Phase 3 — Authentication integration and tenant isolation
+## Phase 3 — Baloot Auth integration and tenant isolation
 
-**Objective:** Secure access before exposing financial functionality by integrating the existing deployed multi-tenant authentication service. Do not recreate its authentication module or credential lifecycle in Baloot Pay.
+**Objective:** Secure access before exposing financial functionality by integrating the existing deployed [Baloot Auth service](https://github.com/sajjadcodes/baloot-auth). Do not recreate its authentication module or credential lifecycle in Baloot Pay.
 
 Tasks:
 
-- [ ] Confirm the service's supported integration mechanism and trust model before writing code.
-- [ ] Integrate the existing authentication service using its documented SDK, protocol, or trusted gateway contract; do not store or issue its credentials in Baloot Pay.
-- [ ] Validate issuer, audience, signature/token status, expiry, and required claims according to that contract; fail closed when validation or the trust dependency is unavailable.
-- [ ] Map the verified principal and tenant context into payment-service authorization without trusting tenant IDs, roles, or scopes supplied separately by the caller.
+- [ ] Confirm the deployed version and Swagger/API contract before writing code. Current docs describe HttpOnly browser cookies, bearer access-token extraction, and a `userId`/`clientId`/`sessionId` principal.
+- [ ] Select the approved integration topology for browser and non-browser callers. Do not assume host-only Auth cookies are available to another API host or that bearer extraction constitutes a machine credential flow.
+- [ ] Verify authentication through the agreed Auth-backed contract. Do not copy the Auth signing secret, query its database directly, or claim local JWT verification also checks live session revocation.
+- [ ] Map the verified Auth principal to a Baloot Pay tenant and operation permissions using an explicitly approved mapping. Auth `clientId` selects an Auth client and is not inherently the payment tenant.
+- [ ] Define and test bounded Auth-call timeouts, fail-closed behavior, telemetry, and any cache behavior against session revocation requirements.
 - [ ] Add authorization guards and policy enforcement for payment-service resources.
 - [ ] Implement resource-level ownership checks.
 - [ ] Add request validation and strict DTO handling.
@@ -150,7 +155,7 @@ Tasks:
 - [ ] Add negative authorization tests.
 - [ ] Test tenant isolation across every implemented resource.
 
-**Completion gate:** The external service remains authoritative for authentication and tenant identity; Baloot Pay does not duplicate its auth module or credential store. Unauthenticated, unauthorized, cross-tenant, revoked-credential, unavailable-auth-service, and malformed requests are rejected consistently with safe and observable failure behavior.
+**Completion gate:** Baloot Auth remains authoritative for authentication and its own client/session lifecycle; Baloot Pay does not duplicate its auth module or credential store. The approved tenant mapping and payment permissions are enforced, and unauthenticated, unauthorized, cross-tenant, revoked-credential, unavailable-auth-service, and malformed requests are rejected consistently with safe and observable failure behavior.
 
 ## Phase 4 — Payment domain and API
 

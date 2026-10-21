@@ -6,20 +6,21 @@ Use the [OWASP API Security Top 10](https://owasp.org/www-project-api-security/)
 
 ## 11.1 Authentication and authorization
 
-Integrate with the already-deployed multi-tenant authentication service. Do not create a replacement authentication module, credential store, or user/tenant identity lifecycle inside Baloot Pay.
+Integrate with the already-deployed [Baloot Auth service](https://github.com/sajjadcodes/baloot-auth). Its documented browser flow uses HttpOnly cookies; its JWT strategy also extracts bearer access tokens and checks the session and active/verified user in the Auth database for each authenticated request. The resulting principal contains `userId`, `clientId`, and `sessionId`; the documented `/auth/me` response exposes user ID and email. Do not create a replacement authentication module, credential store, or Auth user/session lifecycle inside Baloot Pay.
 
 Baloot Pay must:
 
-- Validate the service's documented issuer, audience, signature/token status, expiry, and required claims.
+- Use an explicitly approved integration contract to establish the Auth-verified principal; do not claim that local signature verification alone checks live session revocation.
+- Treat Auth `clientId` as the Auth client context, not as a Baloot Pay business tenant unless an explicit reviewed mapping establishes that relationship.
+- Resolve payment tenant/resource access and operation permissions through an approved authorization policy. Do not assume that the Auth principal or `/auth/me` response includes payment roles or scopes.
 - Fail closed when authentication cannot be established or the required trust dependency is unavailable.
-- Map verified identity and tenant claims into payment-service authorization.
 - Explicit tenant and resource authorization.
-- Least-privilege API scopes.
+- Least-privilege payment permissions.
 - Separate privileged administrative access.
 - Brute-force and abuse protection.
 - Audit logging for privileged operations.
 
-Credential issuance, revocation, and rotation remain the responsibility of the deployed authentication service. Do not trust tenant IDs, roles, permissions, provider account IDs, or payment statuses supplied separately by clients.
+Credential issuance, revocation, and rotation remain the responsibility of the deployed authentication service. Do not share its signing secret or database with Baloot Pay as a shortcut. Do not trust tenant IDs, roles, permissions, provider account IDs, or payment statuses supplied separately by clients. Since the documented Auth cookies are host-only, select and secure the browser-to-payment-API topology deliberately; cookie-authenticated state changes still require CSRF protection.
 
 ## 11.2 Tenant isolation
 
