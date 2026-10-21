@@ -96,7 +96,7 @@ Tasks:
 - [x] Configure NestJS application bootstrap with bounded JSON and URL-encoded body parsers, request-context middleware, a global exception filter, and a success-response interceptor.
 - [x] Configure strict TypeScript settings (`strict` and `noImplicitOverride`) and validate the complete source/test suite under them.
 - [x] Establish linting and formatting with non-mutating `lint` and `format:check` commands; keep autofixes explicit.
-- [ ] Add validated environment configuration.
+- [x] Add validated environment configuration for the current `PORT` setting and provide a non-secret `.env.example`.
 - [ ] Configure Prisma and PostgreSQL.
 - [ ] Design version-controlled database migrations and review their impact before any execution.
 - [ ] Obtain explicit user approval before running Prisma `emit` or any migration/schema-changing command.
@@ -110,7 +110,7 @@ Tasks:
 - [ ] Create unit and integration test conventions.
 - [ ] Create isolated PostgreSQL integration-test conventions; tests must not point at a shared or production database.
 - [ ] Add CI checks for formatting, linting, compilation, and tests.
-- [ ] Provide safe example configuration.
+- [x] Provide safe example configuration with no credentials or secrets.
 
 **Completion gate:** A clean checkout can install dependencies, start the development environment, run the already-approved database setup path, execute tests, and pass CI without real payment credentials. CI must not apply or synchronize a schema unless explicitly configured and approved for its isolated database.
 
