@@ -1,10 +1,14 @@
+import {
+  DEFAULT_PORT,
+  INVALID_PORT_MESSAGE,
+  MAX_PORT,
+  MIN_PORT,
+} from '../common/constants/application.constants';
+import { PORT_PATTERN } from '../common/constants/regex.constants';
+
 export interface AppConfiguration {
   port: number;
 }
-
-const DEFAULT_PORT = 3000;
-const MIN_PORT = 1;
-const MAX_PORT = 65535;
 
 export function validateConfiguration(
   environment: NodeJS.ProcessEnv,
@@ -15,13 +19,13 @@ export function validateConfiguration(
     return { port: DEFAULT_PORT };
   }
 
-  if (!/^\d+$/.test(rawPort)) {
-    throw new Error('Invalid PORT: expected an integer from 1 to 65535.');
+  if (!PORT_PATTERN.test(rawPort)) {
+    throw new Error(INVALID_PORT_MESSAGE);
   }
 
   const port = Number(rawPort);
   if (!Number.isSafeInteger(port) || port < MIN_PORT || port > MAX_PORT) {
-    throw new Error('Invalid PORT: expected an integer from 1 to 65535.');
+    throw new Error(INVALID_PORT_MESSAGE);
   }
 
   return { port };

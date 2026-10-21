@@ -219,6 +219,8 @@ baloot-pay/
 │   │   ├── env.validation.ts
 │   │   └── configuration.module.ts
 │   ├── common/
+│   │   ├── constants/
+│   │   ├── types/
 │   │   ├── errors/
 │   │   ├── validation/
 │   │   ├── logging/
@@ -277,5 +279,7 @@ baloot-pay/
 Do not create every directory as an empty placeholder. Introduce each module when its corresponding roadmap phase begins.
 
 Each business module should have a clear public interface. Other modules must not reach into its private implementation or access its tables without a documented reason.
+
+Keep reusable application constants and regular expressions in `src/common/constants/`, grouped by concern. Keep deployment-specific values such as secrets, URLs, and environment overrides in validated configuration rather than hard-coding them as constants.
 
 ---

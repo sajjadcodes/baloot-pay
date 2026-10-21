@@ -1,3 +1,4 @@
+import { INVALID_PORT_MESSAGE } from '../common/constants/application.constants';
 import { validateConfiguration } from './configuration';
 
 describe('validateConfiguration', () => {
@@ -20,7 +21,7 @@ describe('validateConfiguration', () => {
     'rejects invalid PORT value %j',
     (PORT) => {
       expect(() => validateConfiguration({ PORT })).toThrow(
-        'Invalid PORT: expected an integer from 1 to 65535.',
+        INVALID_PORT_MESSAGE,
       );
     },
   );

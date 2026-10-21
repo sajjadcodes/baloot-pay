@@ -1,8 +1,6 @@
 import type { INestApplication } from '@nestjs/common';
-import {
-  configureBodyParsers,
-  REQUEST_BODY_LIMIT,
-} from './configure-body-parsers';
+import { REQUEST_BODY_LIMIT } from '../constants/http.constants';
+import { configureBodyParsers } from './configure-body-parsers';
 
 describe('configureBodyParsers', () => {
   it('registers JSON and URL-encoded parsers with the request size limit', () => {
