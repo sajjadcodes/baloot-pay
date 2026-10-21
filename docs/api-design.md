@@ -39,18 +39,18 @@ A successful HTTP response does not necessarily mean that money has moved. Clear
 
 ## 10.2 Error model
 
-Use a consistent response structure, for example:
+Use a consistent response structure. The global exception filter returns a sanitized form such as:
 
 ```json
 {
   "statusCode": 409,
-  "code": "PAYMENT_STATE_CONFLICT",
-  "message": "The requested operation is not allowed in the current state.",
-  "requestId": "request-reference"
+  "code": "CONFLICT",
+  "message": "The request conflicts with current state.",
+  "requestId": "server-generated-request-id"
 }
 ```
 
-The example is illustrative. Implement the actual response DTO and error mapping centrally.
+The filter preserves the HTTP status, uses stable general codes for common client errors, and does not expose exception or provider details. Unexpected server errors return a generic message and are logged with the request ID and error type. The request ID is null only if the request-context middleware did not run.
 
 Do not expose internal exceptions or sensitive provider messages directly to clients.
 

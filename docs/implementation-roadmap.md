@@ -93,7 +93,7 @@ If a critical decision is missing, Copilot must document the blocker and ask for
 
 Tasks:
 
-- [ ] Configure NestJS application bootstrap.
+- [x] Configure NestJS application bootstrap with bounded JSON and URL-encoded body parsers, request-context middleware, and a global API exception filter.
 - [ ] Configure strict TypeScript settings.
 - [ ] Establish linting and formatting.
 - [ ] Add validated environment configuration.
@@ -103,8 +103,10 @@ Tasks:
 - [ ] Keep runtime database privileges separate from schema migration privileges.
 - [ ] Create Docker-based local development.
 - [ ] Add health and readiness endpoints.
-- [ ] Establish centralized exception handling.
-- [ ] Configure structured logging and request IDs.
+- [x] Establish centralized exception handling with sanitized response bodies and stable general error codes.
+- [ ] Configure structured logging.
+- [x] Generate server-owned request IDs and return them with API error responses for correlation.
+- [x] Set baseline response security headers and prevent storage of sensitive API responses.
 - [ ] Create unit and integration test conventions.
 - [ ] Create isolated PostgreSQL integration-test conventions; tests must not point at a shared or production database.
 - [ ] Add CI checks for formatting, linting, compilation, and tests.
