@@ -35,6 +35,22 @@ Provider webhooks should use separate, provider-specific routes or a carefully d
 - Never expose provider secrets, internal stack traces, or sensitive raw provider responses.
 - Return only fields that callers are authorized to access.
 
+Successful responses use a consistent envelope:
+
+```json
+{
+  "success": true,
+  "code": 202,
+  "message": "Successful request!",
+  "data": {
+    "paymentId": "payment-reference"
+  },
+  "requestId": "server-generated-request-id"
+}
+```
+
+`code` is the actual HTTP status, not a payment outcome. For example, `202` means the request was accepted for processing; it does not mean funds were captured or settled. The interceptor leaves `204 No Content` and `304 Not Modified` without a response body.
+
 A successful HTTP response does not necessarily mean that money has moved. Clearly distinguish an accepted asynchronous request from a confirmed financial outcome.
 
 ## 10.2 Error model

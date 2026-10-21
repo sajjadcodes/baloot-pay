@@ -93,7 +93,7 @@ If a critical decision is missing, Copilot must document the blocker and ask for
 
 Tasks:
 
-- [x] Configure NestJS application bootstrap with bounded JSON and URL-encoded body parsers, request-context middleware, and a global API exception filter.
+- [x] Configure NestJS application bootstrap with bounded JSON and URL-encoded body parsers, request-context middleware, a global exception filter, and a success-response interceptor.
 - [ ] Configure strict TypeScript settings.
 - [ ] Establish linting and formatting.
 - [ ] Add validated environment configuration.

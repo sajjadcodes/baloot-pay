@@ -1,15 +1,15 @@
 import { ArgumentsHost, HttpException, Logger } from '@nestjs/common';
 import type { Response } from 'express';
-import { ApiExceptionFilter } from './api-exception.filter';
+import { GlobalExceptionFilter } from './global-exception.filter';
 
-describe('ApiExceptionFilter', () => {
-  let filter: ApiExceptionFilter;
+describe('GlobalExceptionFilter', () => {
+  let filter: GlobalExceptionFilter;
   let response: Pick<Response, 'getHeader' | 'status' | 'json'>;
   let status: jest.Mock;
   let json: jest.Mock;
 
   beforeEach(() => {
-    filter = new ApiExceptionFilter();
+    filter = new GlobalExceptionFilter();
     json = jest.fn();
     status = jest.fn().mockReturnThis();
     response = {

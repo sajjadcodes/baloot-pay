@@ -6,8 +6,8 @@ import {
   Logger,
 } from '@nestjs/common';
 import type { Response } from 'express';
-import type { ApiErrorResponse } from '../types/api-error-response.interface';
-import type { SafeApiError } from '../types/safe-api-error.type';
+import type { ApiErrorResponse } from '../common/types/api-error-response.interface';
+import type { SafeApiError } from '../common/types/safe-api-error.type';
 
 const SAFE_ERRORS: Record<number, SafeApiError> = {
   400: { code: 'BAD_REQUEST', message: 'The request is invalid.' },
@@ -23,8 +23,8 @@ const SAFE_ERRORS: Record<number, SafeApiError> = {
 };
 
 @Catch()
-export class ApiExceptionFilter implements ExceptionFilter {
-  private readonly logger = new Logger(ApiExceptionFilter.name);
+export class GlobalExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(GlobalExceptionFilter.name);
 
   catch(exception: unknown, host: ArgumentsHost): void {
     // Use Nest's HTTP response adapter so errors from any route share one format.
