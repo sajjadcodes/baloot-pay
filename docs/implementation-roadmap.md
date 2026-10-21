@@ -20,6 +20,7 @@ The current repository baseline is a minimal NestJS 11 application. It has no Pr
 
 - Confirm the Prisma 8 release, Node.js compatibility, PostgreSQL version, supported generator/provider configuration, and official command syntax against the official documentation before choosing dependencies or scripts. Do not infer Prisma 8 behavior from older Prisma versions.
 - Pin compatible Prisma packages and preserve the package-manager lockfile. Keep schema, migration history, generated client output, and runtime adapter configuration consistent with the selected Prisma 8 setup.
+- Treat Prisma 8 release candidates as development-only; block production deployment until a stable release and compatible PostgreSQL runtime package are verified.
 - A schema change must first be proposed as a reviewable diff. Describe its data impact, constraints, indexes, lock/availability risks, backfill strategy, and recovery approach before asking for approval.
 - **Never run Prisma `emit`, any migration command, or any other command that applies or synchronizes schema changes unless the user explicitly confirms that exact operation.** This includes development, deploy, reset, and push flows. Do not treat approval to edit a schema or write migration files as approval to execute them. Never reset or drop a database without explicit approval and confirmation that it is disposable.
 - Before an approved schema operation, state the exact command, target environment/database, expected effect, and recovery plan. Stop if the target or effect is uncertain. Do not use production credentials for development or test operations.
@@ -78,7 +79,8 @@ Tasks:
 - [ ] Document payment lifecycle and financial invariants.
 - [ ] Define the intended card-data handling model.
 - [ ] Verify Prisma 8, PostgreSQL, Node.js, and NestJS compatibility using their official version-specific documentation.
-- [ ] Define the application database role, schema-owner/migration role, network exposure, TLS, backup, and recovery model.
+- [ ] Define the AWS RDS for PostgreSQL model: private networking and TLS, separate Auth and Pay databases and roles, runtime versus migration credentials, backup and recovery, and whether one shared RDS instance meets the accepted isolation and availability requirements.
+- [ ] Define the EC2 deployment boundary for Auth and Pay, including separate processes/containers and configuration, secret delivery, instance metadata protections, host hardening, and the risk accepted while both services share one host.
 - [ ] Identify PCI DSS, privacy, and other compliance questions requiring expert confirmation.
 - [ ] Write initial architecture decision records in `docs/decisions/`.
 - [ ] Create an initial threat model in `docs/threat-model/`.

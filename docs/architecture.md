@@ -62,6 +62,22 @@ Every module and abstraction must serve a documented business or engineering req
 | Containers | Docker | Consistent build and deployment environments |
 | CI/CD | Repository-supported pipeline | Automated verification and controlled releases |
 
+### Prisma 8 contract and runtime
+
+Baloot Pay uses the Prisma 8 PostgreSQL contract/runtime pattern: the source contract lives in `src/prisma/contract.prisma`, and the application uses `@prisma/orm-postgres` rather than a generated `PrismaClient`. Contract artifacts are generated and must not be edited by hand. Baloot Pay is ESM so the Prisma runtime and JSON contract imports work consistently.
+
+The API runtime uses a least-privileged `DATABASE_URL`; Prisma tooling uses the separate `MIGRATION_DATABASE_URL` and must never be given to the API process. `TenantUser.authUserId` stores the verified Baloot Auth user ID as an external identity reference. Each user maps to at most one payment tenant; Auth `clientId` identifies the Baloot Pay Auth client and is not used as the payment tenant ID.
+
+The Prisma 8 packages currently available to this project are release candidates. They may be used for development, but production deployment is blocked until a stable Prisma 8 release and compatible PostgreSQL runtime packages are verified.
+
+### AWS deployment boundary
+
+The initial deployment may place Baloot Auth and Baloot Pay on one EC2 instance, but they must remain separate processes or containers with separate configuration, logs, health checks, and deployment/restart controls. Do not combine their code or database access. A shared EC2 host is a shared operating-system and instance-profile blast radius: a host or sufficiently privileged container compromise can affect both services. Treat this as an initial cost/operations choice, not a strong security boundary, and plan to move to separately isolated compute when availability or risk requirements justify it.
+
+Use a private Amazon RDS for PostgreSQL deployment in the same VPC, with no public database endpoint. Allow inbound database traffic only from the application security group. Use a separate database for Baloot Pay and Baloot Auth, separate database roles and credentials, and grant each service access only to its own database. The Pay runtime role must not own schemas or run migrations; migration credentials must be separate from the API process. Baloot Pay must never query Auth’s database. Keep credentials in AWS Secrets Manager or another approved secret manager rather than source control, baked images, or plaintext deployment files.
+
+For the first deployment, the two databases may share one RDS instance to reduce cost, provided its capacity, backup/restore, maintenance, and failure domain are explicitly accepted. Separate databases on one RDS instance do not isolate CPU, memory, storage, instance failure, or administrative privileges. Use separate RDS instances when stronger workload, operational, recovery, or blast-radius isolation is required; if the payment risk assessment calls for that isolation, separate instances are the production choice rather than a later optimization.
+
 ### Existing Baloot Auth integration boundary
 
 Baloot Pay uses the existing [Baloot Auth service](https://github.com/sajjadcodes/baloot-auth) for authentication; it must not recreate that service's registration, password, session, or credential lifecycle.

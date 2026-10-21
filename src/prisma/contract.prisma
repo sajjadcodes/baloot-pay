@@ -1,0 +1,32 @@
+// use prisma-8
+enum TenantStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum TenantUserStatus {
+  ACTIVE
+  DISABLED
+}
+
+model Tenant {
+  id        Uuid              @id @default(uuid())
+  name      VarChar(128)
+  status    TenantStatus      @default(ACTIVE)
+  createdAt TimestamptzString @default(now()) @map("created_at")
+  updatedAt temporal.updatedAtString() @map("updated_at")
+  members   TenantUser[]
+
+  @@map("tenants")
+}
+
+model TenantUser {
+  authUserId Uuid              @id @map("auth_user_id")
+  tenantId   Uuid              @map("tenant_id")
+  status     TenantUserStatus  @default(ACTIVE)
+  createdAt  TimestamptzString @default(now()) @map("created_at")
+  tenant     Tenant            @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId])
+  @@map("tenant_users")
+}
