@@ -6,18 +6,10 @@ import {
   Logger,
 } from '@nestjs/common';
 import type { Response } from 'express';
+import type { ApiErrorResponse } from '../types/api-error-response.interface';
+import type { SafeApiError } from '../types/safe-api-error.type';
 
-interface ApiErrorResponse {
-  statusCode: number;
-  code: string;
-  message: string;
-  requestId: string | null;
-}
-
-const SAFE_ERRORS: Record<
-  number,
-  Pick<ApiErrorResponse, 'code' | 'message'>
-> = {
+const SAFE_ERRORS: Record<number, SafeApiError> = {
   400: { code: 'BAD_REQUEST', message: 'The request is invalid.' },
   401: { code: 'UNAUTHORIZED', message: 'Authentication is required.' },
   403: { code: 'FORBIDDEN', message: 'The operation is not permitted.' },
