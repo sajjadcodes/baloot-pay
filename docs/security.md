@@ -20,7 +20,7 @@ Baloot Pay must:
 - Brute-force and abuse protection.
 - Audit logging for privileged operations.
 
-Credential issuance, revocation, and rotation remain the responsibility of the deployed authentication service. Do not share its signing secret or database with Baloot Pay as a shortcut. Do not trust tenant IDs, roles, permissions, provider account IDs, or payment statuses supplied separately by clients. Since the documented Auth cookies are host-only, select and secure the browser-to-payment-API topology deliberately; cookie-authenticated state changes still require CSRF protection.
+Credential issuance, revocation, and rotation remain the responsibility of the deployed authentication service. Baloot Auth and Baloot Pay use separate logical databases, database roles, and credentials; Pay must never connect to or query Auth's database. Do not share Auth's signing secret or database with Baloot Pay as a shortcut. Do not trust tenant IDs, roles, permissions, provider account IDs, or payment statuses supplied separately by clients. Since the documented Auth cookies are host-only, select and secure the browser-to-payment-API topology deliberately; cookie-authenticated state changes still require CSRF protection.
 
 ## 11.2 Tenant isolation
 

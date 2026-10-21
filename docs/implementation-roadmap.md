@@ -79,7 +79,8 @@ Tasks:
 - [ ] Document payment lifecycle and financial invariants.
 - [ ] Define the intended card-data handling model.
 - [ ] Verify Prisma 8, PostgreSQL, Node.js, and NestJS compatibility using their official version-specific documentation.
-- [ ] Define the AWS RDS for PostgreSQL model: private networking and TLS, separate Auth and Pay databases and roles, runtime versus migration credentials, backup and recovery, and whether one shared RDS instance meets the accepted isolation and availability requirements.
+- [x] Decide to use one dedicated logical database for Baloot Auth and a separate dedicated logical database for Baloot Pay, with separate database roles and credentials and no cross-service database access.
+- [ ] Define the AWS RDS for PostgreSQL infrastructure model: private networking and TLS, runtime versus migration credentials, backup and recovery, and whether the two databases share one RDS instance or use separate instances based on accepted isolation, cost, and availability requirements.
 - [ ] Define the EC2 deployment boundary for Auth and Pay, including separate processes/containers and configuration, secret delivery, instance metadata protections, host hardening, and the risk accepted while both services share one host.
 - [ ] Identify PCI DSS, privacy, and other compliance questions requiring expert confirmation.
 - [ ] Write initial architecture decision records in `docs/decisions/`.
