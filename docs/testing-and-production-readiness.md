@@ -79,6 +79,32 @@ Every discovered financial or security bug should produce a regression test.
 - Track flaky tests instead of silently skipping them.
 - Use property-based testing where it meaningfully strengthens money, state-machine, and concurrency invariants.
 
+## 14.6 Load, stress, and resilience testing
+
+Load testing is a release qualification activity, not a substitute for correctness tests. Define measurable traffic, latency, availability, and error-budget objectives before selecting pass/fail thresholds. Do not invent a single requests-per-second target and treat it as production capacity.
+
+Use an isolated, production-representative environment with synthetic data and no live payment credentials. Test the API, PostgreSQL, workers, and provider simulator together where practical. Record the test profile, environment, build, database size, configuration, and results so runs can be compared.
+
+Run and retain results for:
+
+- **Baseline and ramp:** Increase traffic gradually; measure throughput, p50/p95/p99 latency, error rate, CPU/memory, database connections, query latency, and worker lag.
+- **Peak and burst:** Exercise the agreed peak profile and short bursts; verify backpressure, bounded queues, rate limits, and graceful overload responses.
+- **Soak:** Sustain representative traffic long enough to expose connection leaks, memory growth, queue drift, retry storms, and resource exhaustion.
+- **Stress and recovery:** Exceed expected capacity in a controlled environment; confirm graceful degradation and that the service recovers after load is reduced.
+- **Database contention:** Run concurrent idempotent creates, duplicate keys, competing state transitions, and partial refunds; verify uniqueness and financial invariants remain enforced under contention.
+- **Worker/provider pressure:** Simulate slow, unavailable, rate-limited, and intermittently failing providers; verify bounded retries, no duplicate charges, durable queue behavior, and timely recovery.
+- **Failure injection:** Exercise database connection loss, worker restarts, timeouts after possible provider processing, and webhook bursts while checking the resulting durable records.
+
+Acceptance criteria must include both performance and correctness: no duplicate logical operations or unsafe duplicate charges, no cross-tenant disclosure, no lost durable work, no invalid state transitions, and no unbounded resource/queue growth. A fast response with an incorrect financial result is a failed test.
+
+## 14.7 Security and abuse testing
+
+For each protected API, test unauthenticated and unauthorized access, incorrect scopes, revoked credentials, tenant-ID tampering, cross-tenant object IDs, mass assignment, malformed and oversized payloads, injection-shaped input, pagination/filter abuse, and rate-limit behavior. Verify errors do not disclose secrets, stack traces, provider internals, or another tenant's data.
+
+For provider-facing surfaces, test invalid signatures, replayed and duplicated webhooks, stale/out-of-order events, wrong provider-account context, and payload tampering. Test secret redaction in logs and telemetry. Verify the runtime database role cannot perform schema changes and that any row-level security policy behaves correctly across pooled connections if RLS is adopted.
+
+Run security and dependency checks in CI, investigate findings rather than suppressing them blindly, and add regression tests for discovered application vulnerabilities. Before production approval, complete the final threat-model review and any independent security assessment required by the risk and compliance owners.
+
 ---
 
 ---

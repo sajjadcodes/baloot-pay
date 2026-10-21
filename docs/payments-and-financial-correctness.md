@@ -18,21 +18,19 @@ Tenant status should support an explicit lifecycle, such as active, suspended, o
 
 All tenant-owned resources must have a defined ownership relationship.
 
-## 7.2 API credential
+## 7.2 Authenticated tenant context
 
-Represents a credential issued to a tenant or an approved machine identity.
+Authentication and tenant identity are provided by the already-deployed multi-tenant authentication service. Baloot Pay must integrate with that service's documented trust contract rather than create a local authentication module, credential store, or duplicate user/tenant identity system.
 
-Requirements:
+The payment service must:
 
-- Store only a cryptographic hash of an API secret when the credential is a high-entropy bearer secret that does not need to be recovered.
-- Show the secret only at issuance.
-- Support revocation and rotation.
-- Store scopes, status, creation time, expiration if applicable, and last-used metadata.
-- Never log the raw credential.
-- Support different permissions for payment creation, refunds, reads, and administration.
-- Separate tenant API credentials from privileged platform administration credentials.
+- Accept identity, tenant, and permission claims only after verifying them using the approved integration contract.
+- Bind each request to a verified tenant context and enforce resource ownership in application services.
+- Fail closed if the identity is missing, invalid, expired, revoked, or cannot be verified according to the service contract.
+- Avoid persisting authentication secrets or copying the external service's credential lifecycle into payment tables.
+- Keep authorization for Baloot Pay payment operations explicit; successful authentication alone does not authorize access to every payment or operation.
 
-The exact authentication format must be decided before implementation.
+The exact protocol, claim names, key/token validation, revocation behavior, and administrative access boundary must be confirmed before implementation.
 
 ## 7.3 Payment
 

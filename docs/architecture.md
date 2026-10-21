@@ -54,7 +54,7 @@ Every module and abstraction must serve a documented business or engineering req
 | ORM | Prisma 8 | Database access, schema management and migrations |
 | API documentation | OpenAPI / Swagger | Versioned API contracts |
 | Validation | NestJS-compatible DTO validation | Input validation and strict request schemas |
-| Authentication | We shall use the already built service called Baloot Auth through bestpractice protocol |
+| Authentication | Existing deployed multi-tenant authentication service; Baloot Pay validates its documented identity contract and enforces local resource authorization |
 | Background processing | Durable queue or PostgreSQL-backed work queue | Asynchronous workflows and retries |
 | Testing | Jest and HTTP integration testing | Unit, integration and end-to-end verification |
 | API protection | Rate limiting, throttling and abuse controls | Resource and business-flow protection |
@@ -205,8 +205,6 @@ baloot-pay/
 │   │   │   ├── application/
 │   │   │   ├── infrastructure/
 │   │   │   └── presentation/
-│   │   ├── authentication/
-│   │   ├── api-credentials/
 │   │   ├── payments/
 │   │   ├── payment-providers/
 │   │   │   ├── contracts/

@@ -6,18 +6,20 @@ Use the [OWASP API Security Top 10](https://owasp.org/www-project-api-security/)
 
 ## 11.1 Authentication and authorization
 
-Implement:
+Integrate with the already-deployed multi-tenant authentication service. Do not create a replacement authentication module, credential store, or user/tenant identity lifecycle inside Baloot Pay.
 
-- Secure machine-to-machine authentication.
+Baloot Pay must:
+
+- Validate the service's documented issuer, audience, signature/token status, expiry, and required claims.
+- Fail closed when authentication cannot be established or the required trust dependency is unavailable.
+- Map verified identity and tenant claims into payment-service authorization.
 - Explicit tenant and resource authorization.
 - Least-privilege API scopes.
 - Separate privileged administrative access.
-- Credential revocation and rotation.
 - Brute-force and abuse protection.
-- Secure session or token validation where applicable.
 - Audit logging for privileged operations.
 
-Do not trust tenant IDs, roles, permissions, provider account IDs, or payment statuses supplied by clients.
+Credential issuance, revocation, and rotation remain the responsibility of the deployed authentication service. Do not trust tenant IDs, roles, permissions, provider account IDs, or payment statuses supplied separately by clients.
 
 ## 11.2 Tenant isolation
 

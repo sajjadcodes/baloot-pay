@@ -4,6 +4,61 @@ Implement the following phases in order. Every phase must have a concrete comple
 
 Do not implement the entire roadmap in one Copilot request.
 
+## Implementation contract
+
+The current repository baseline is a minimal NestJS 11 application. It has no Prisma dependency, Prisma schema, database configuration, or payment implementation. Treat this as a greenfield implementation inside the existing NestJS app; inspect the live repository again before each change because this baseline can change.
+
+### Small, reviewable increments
+
+- Implement one independently reviewable behavior at a time. Each increment must have a narrow scope, its own relevant tests, and a short change summary.
+- Keep a proposed commit to one cohesive increment; do not bundle a completed documentation section or unrelated phase into a large commit.
+- Never create a commit unless the user explicitly confirms. When asked to prepare a commit, stage only the exact reviewed paths and provide a proposed commit subject and description.
+- Do not move to the next increment when the current one has failing checks or an unresolved financial, security, or provider decision.
+- Report changed files, commands actually run, outcomes, remaining risks, and the next smallest increment. Do not claim production readiness from a passing build or test suite alone.
+
+### Prisma 8 and database approval boundary
+
+- Confirm the Prisma 8 release, Node.js compatibility, PostgreSQL version, supported generator/provider configuration, and official command syntax against the official documentation before choosing dependencies or scripts. Do not infer Prisma 8 behavior from older Prisma versions.
+- Pin compatible Prisma packages and preserve the package-manager lockfile. Keep schema, migration history, generated client output, and runtime adapter configuration consistent with the selected Prisma 8 setup.
+- A schema change must first be proposed as a reviewable diff. Describe its data impact, constraints, indexes, lock/availability risks, backfill strategy, and recovery approach before asking for approval.
+- **Never run Prisma `emit`, any migration command, or any other command that applies or synchronizes schema changes unless the user explicitly confirms that exact operation.** This includes development, deploy, reset, and push flows. Do not treat approval to edit a schema or write migration files as approval to execute them. Never reset or drop a database without explicit approval and confirmation that it is disposable.
+- Before an approved schema operation, state the exact command, target environment/database, expected effect, and recovery plan. Stop if the target or effect is uncertain. Do not use production credentials for development or test operations.
+- Separate the application database role from the migration/owner role. The runtime role must have only the privileges required by the application; schema-changing privileges must not be available to the public API process.
+
+### Security from the first endpoint; hardening at the end
+
+Security is not deferred until the final phase. Every API, persistence, and provider increment must include its applicable authentication, authorization, validation, tenant isolation, secret handling, safe logging, and negative tests before it is considered complete. The final security phase is an independent adversarial review and hardening pass over the implemented system, not the first time security controls are added.
+
+No real payment credentials, live transactions, or production launch are permitted until the applicable security, operational, provider, and compliance gates have been explicitly reviewed and approved. No design can promise a service is “unhackable”; the goal is layered controls, limited blast radius, observable failures, and tested recovery.
+
+## Step-by-step delivery sequence
+
+Treat each numbered step below as a small implementation/review increment, not permission to execute database commands. The phase checklists that follow provide additional detail.
+
+1. **Baseline and scope:** Inventory the current NestJS app, scripts, tests, and deployment assumptions. Confirm the first provider, countries/currencies, tenant model, the deployed multi-tenant authentication service's integration contract, card-data flow, expected traffic, availability/latency objectives, and applicable compliance questions. Record unresolved decisions; do not guess.
+2. **Application safety foundation:** Establish strict configuration validation, consistent error mapping, request/correlation IDs, redacted structured logging, request/body limits, security headers, explicit CORS policy where needed, and liveness/readiness behavior. Add tests for invalid configuration and failure responses.
+3. **Prisma 8 and PostgreSQL design:** Verify official Prisma 8 compatibility and usage, select supported packages/adapters, define database environments and least-privilege roles, and review the initial schema/migration plan. Keep any schema/client-generation execution behind the approval boundary above.
+4. **Persistence foundation:** After the schema and exact operation are approved, implement the tenant and provider-account foundations, durable identifiers, database constraints, indexes, and repository integration tests. Verify behavior against PostgreSQL, not only mocks.
+5. **Authentication integration and tenant authorization:** Integrate with the already-deployed multi-tenant authentication service using its supported protocol. Do not build a local authentication module, user/tenant identity store, credential issuance/rotation flow, or duplicate authentication service. Map only verified identity, tenant, and permission claims into payment-service authorization; enforce object-level ownership checks here. Test missing, malformed, expired, revoked, insufficient-scope, and cross-tenant credentials and resource IDs.
+6. **Payment domain and read/create APIs:** Add exact money/currency validation, domain state transitions, API contracts, stable errors, idempotency, event history, and tenant-scoped queries. Test boundary amounts, malformed inputs, duplicate/concurrent requests, and illegal transitions.
+7. **Durable provider submission:** Implement a single documented provider adapter and transactional outbox. Exercise provider success/rejection, timeouts after possible processing, malformed responses, retries, worker crashes, duplicate delivery, and recovery without duplicate charges.
+8. **Webhooks and refunds:** Add provider-specific signature/replay verification, durable inbox/deduplication, out-of-order event handling, and only provider-supported capture/cancel/refund flows. Test forged/replayed events, webhook races, refund limits, and concurrent partial refunds.
+9. **Reconciliation and operator workflows:** Compare internal state to provider evidence, surface discrepancies, and provide audited recovery paths. Test stuck and uncertain outcomes without overwriting financial history.
+10. **Scale and resilience qualification:** Define explicit load profiles from the agreed traffic objectives; run API and worker load, burst, soak, database contention, pool saturation, queue backlog, and dependency-outage tests. Tune only from measurements and rerun regressions.
+11. **Final security hardening and release gate:** Revisit the threat model against the running implementation. Perform focused authorization and tenant-isolation reviews, injection/input abuse checks, SSRF/egress review where applicable, webhook replay/forgery tests, dependency and secret scans, database privilege/RLS review if used, backup/restore and recovery drills, and independent security review appropriate to the risk. Remediate findings and rerun affected suites before any production approval.
+12. **Additional capabilities:** Add another provider, routing, disputes, or advanced features only after the first provider and operational workflows meet their gates. Provider failover must not resubmit an outcome-unknown payment without a verified safe policy.
+
+### Increment-level completion gate
+
+Before an increment is considered complete:
+
+- Its acceptance criteria and affected trust boundaries are stated.
+- Tests cover the intended success path, rejection/negative cases, relevant concurrency or failure behavior, and a regression for each fixed defect.
+- Relevant formatting, lint, type-check, build, unit, integration, and e2e checks are run and reported truthfully.
+- Database tests use an isolated PostgreSQL environment for constraints, locking, transactionality, and concurrency guarantees; mocks alone are not sufficient.
+- No migration, schema synchronization, or Prisma `emit` is run without the user's explicit confirmation for that operation.
+- Only the files needed for the approved increment are staged, and no commit is created without explicit confirmation.
+
 ## Phase 0 — Requirements and architectural decisions
 
 **Objective:** Resolve the decisions that would otherwise cause expensive architectural mistakes.
@@ -14,14 +69,17 @@ Tasks:
 - [ ] Confirm the supported Node.js, NestJS, Prisma, and PostgreSQL versions.
 - [ ] Define the initial payment provider and integration capabilities.
 - [ ] Define the initial countries and currencies.
-- [ ] Confirm the tenant and authentication model.
+- [ ] Document the deployed multi-tenant authentication service contract, verified tenant/permission claims, token validation, revocation behavior, failure behavior, and availability dependency.
+- [ ] Define realistic expected traffic, peak/burst behavior, latency objectives, availability objectives, and test environments; do not invent pass/fail thresholds.
 - [ ] Document payment lifecycle and financial invariants.
 - [ ] Define the intended card-data handling model.
+- [ ] Verify Prisma 8, PostgreSQL, Node.js, and NestJS compatibility using their official version-specific documentation.
+- [ ] Define the application database role, schema-owner/migration role, network exposure, TLS, backup, and recovery model.
 - [ ] Identify PCI DSS, privacy, and other compliance questions requiring expert confirmation.
 - [ ] Write initial architecture decision records in `docs/decisions/`.
 - [ ] Create an initial threat model in `docs/threat-model/`.
 
-**Completion gate:** No unresolved decision is silently assumed where it affects financial correctness, security, or provider compatibility.
+**Completion gate:** No unresolved decision is silently assumed where it affects financial correctness, security, provider compatibility, database safety, or load-test acceptance criteria.
 
 If a critical decision is missing, Copilot must document the blocker and ask for clarification rather than implement an invented behavior.
 
@@ -36,16 +94,19 @@ Tasks:
 - [ ] Establish linting and formatting.
 - [ ] Add validated environment configuration.
 - [ ] Configure Prisma and PostgreSQL.
-- [ ] Add version-controlled database migrations.
+- [ ] Design version-controlled database migrations and review their impact before any execution.
+- [ ] Obtain explicit user approval before running Prisma `emit` or any migration/schema-changing command.
+- [ ] Keep runtime database privileges separate from schema migration privileges.
 - [ ] Create Docker-based local development.
 - [ ] Add health and readiness endpoints.
 - [ ] Establish centralized exception handling.
 - [ ] Configure structured logging and request IDs.
 - [ ] Create unit and integration test conventions.
+- [ ] Create isolated PostgreSQL integration-test conventions; tests must not point at a shared or production database.
 - [ ] Add CI checks for formatting, linting, compilation, and tests.
 - [ ] Provide safe example configuration.
 
-**Completion gate:** A clean checkout can install dependencies, start the development environment, apply migrations, run tests, and pass CI without real payment credentials.
+**Completion gate:** A clean checkout can install dependencies, start the development environment, run the already-approved database setup path, execute tests, and pass CI without real payment credentials. CI must not apply or synchronize a schema unless explicitly configured and approved for its isolated database.
 
 ## Phase 2 — Domain model and persistence
 
@@ -66,27 +127,30 @@ Tasks:
 - [ ] Define deletion and retention policies.
 - [ ] Add repository integration tests.
 - [ ] Test concurrent writes and conflicting requests.
+- [ ] Verify runtime DB roles cannot perform schema changes or access another environment.
 
 **Completion gate:** Database constraints enforce critical invariants, migrations are reproducible, and concurrent operations cannot violate tested financial rules.
 
-## Phase 3 — Authentication and tenant isolation
+## Phase 3 — Authentication integration and tenant isolation
 
-**Objective:** Secure access before exposing financial functionality.
+**Objective:** Secure access before exposing financial functionality by integrating the existing deployed multi-tenant authentication service. Do not recreate its authentication module or credential lifecycle in Baloot Pay.
 
 Tasks:
 
-- [ ] Implement the approved authentication model.
-- [ ] Implement tenant-scoped API credentials.
-- [ ] Implement credential hashing, issuance, revocation, and rotation.
-- [ ] Add authorization guards and policy enforcement.
+- [ ] Confirm the service's supported integration mechanism and trust model before writing code.
+- [ ] Integrate the existing authentication service using its documented SDK, protocol, or trusted gateway contract; do not store or issue its credentials in Baloot Pay.
+- [ ] Validate issuer, audience, signature/token status, expiry, and required claims according to that contract; fail closed when validation or the trust dependency is unavailable.
+- [ ] Map the verified principal and tenant context into payment-service authorization without trusting tenant IDs, roles, or scopes supplied separately by the caller.
+- [ ] Add authorization guards and policy enforcement for payment-service resources.
 - [ ] Implement resource-level ownership checks.
 - [ ] Add request validation and strict DTO handling.
 - [ ] Add rate limits and sensitive-operation quotas.
+- [ ] Define limits from measured/approved service capacity; test throttling and recovery without rate-limit bypasses.
 - [ ] Add security audit events.
 - [ ] Add negative authorization tests.
 - [ ] Test tenant isolation across every implemented resource.
 
-**Completion gate:** Unauthenticated, unauthorized, cross-tenant, revoked-credential, and malformed requests are rejected consistently.
+**Completion gate:** The external service remains authoritative for authentication and tenant identity; Baloot Pay does not duplicate its auth module or credential store. Unauthenticated, unauthorized, cross-tenant, revoked-credential, unavailable-auth-service, and malformed requests are rejected consistently with safe and observable failure behavior.
 
 ## Phase 4 — Payment domain and API
 
@@ -103,6 +167,7 @@ Tasks:
 - [ ] Implement stable error codes.
 - [ ] Publish OpenAPI documentation.
 - [ ] Add unit, integration, and end-to-end tests.
+- [ ] Test request size/content-type limits, injection-shaped input, mass-assignment attempts, and authorization on every resource operation.
 
 **Completion gate:** Payment lifecycle behavior is deterministic and tested without requiring a real provider.
 
@@ -144,6 +209,7 @@ Tasks:
 - [ ] Test crashes before and after external provider requests.
 - [ ] Test duplicate worker execution.
 - [ ] Test queue backlog and provider outages.
+- [ ] Test graceful worker shutdown, lease expiry/claim recovery, and bounded retry behavior under sustained backlog.
 
 **Completion gate:** No critical operation is silently lost when an API process or worker restarts.
 
@@ -236,11 +302,15 @@ Tasks:
 - [ ] Verify migration and rollback procedures.
 - [ ] Verify secret rotation.
 - [ ] Test provider outage and recovery scenarios.
+- [ ] Perform a final least-privilege database review, including row-level security behavior if RLS is adopted.
+- [ ] Verify that no production endpoint, credential, or database becomes publicly reachable beyond the approved design.
 - [ ] Review retention, access controls, and operational permissions.
 - [ ] Verify disaster recovery procedures.
 - [ ] Complete compliance and security reviews applicable to the actual business model.
 
 **Completion gate:** Production release is approved only after the required technical, operational, and external compliance reviews have been completed.
+
+Load-test thresholds and launch gates must be based on the Phase 0 service objectives and explicitly approved before the test. Passing a load test at an arbitrary request rate is not evidence of capacity for real traffic.
 
 ## Phase 12 — Additional providers and advanced capabilities
 

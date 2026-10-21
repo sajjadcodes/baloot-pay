@@ -54,7 +54,7 @@ Actual money movement remains the responsibility of the integrated payment provi
 
 ### Included in the initial roadmap
 
-- Tenant and API credential management.
+- Integration with the existing multi-tenant authentication service and payment-service resource authorization.
 - Payment creation and retrieval.
 - Provider adapter abstraction.
 - Payment status tracking.
@@ -98,7 +98,7 @@ Before implementing provider-dependent or jurisdiction-dependent functionality, 
 - Initial payment provider and supported payment methods.
 - Merchant-of-record and settlement responsibilities.
 - Whether Baloot Pay serves one merchant or multiple independent tenants.
-- Authentication model for tenant applications and administrative users.
+- The authentication service's integration contract, tenant/permission claims, administrative access boundary, and failure behavior.
 - Expected transaction volume and latency requirements.
 - Data retention and deletion requirements.
 - Applicable PCI DSS scope and validation obligations.
