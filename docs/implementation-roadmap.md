@@ -95,7 +95,7 @@ Tasks:
 
 - [x] Configure NestJS application bootstrap with bounded JSON and URL-encoded body parsers, request-context middleware, a global exception filter, and a success-response interceptor.
 - [x] Configure strict TypeScript settings (`strict` and `noImplicitOverride`) and validate the complete source/test suite under them.
-- [ ] Establish linting and formatting.
+- [x] Establish linting and formatting with non-mutating `lint` and `format:check` commands; keep autofixes explicit.
 - [ ] Add validated environment configuration.
 - [ ] Configure Prisma and PostgreSQL.
 - [ ] Design version-controlled database migrations and review their impact before any execution.
