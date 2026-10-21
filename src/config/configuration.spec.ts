@@ -1,5 +1,5 @@
-import { INVALID_PORT_MESSAGE } from '../common/constants/application.constants';
-import { validateConfiguration } from './configuration';
+import { INVALID_PORT_MESSAGE } from '../common/constants/application.constants.js';
+import { validateConfiguration } from './configuration.js';
 
 describe('validateConfiguration', () => {
   it('uses the default port when PORT is not set', () => {

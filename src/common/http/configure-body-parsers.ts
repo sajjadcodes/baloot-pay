@@ -1,6 +1,6 @@
 import type { INestApplication } from '@nestjs/common';
 import { json, urlencoded } from 'express';
-import { REQUEST_BODY_LIMIT } from '../constants/http.constants';
+import { REQUEST_BODY_LIMIT } from '../constants/http.constants.js';
 
 // Nest's automatic parsers are disabled at bootstrap so accepted formats and
 // size limits stay explicit instead of depending on framework defaults.

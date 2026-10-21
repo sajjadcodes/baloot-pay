@@ -1,4 +1,4 @@
-import type { SafeApiError } from '../types/safe-api-error.type';
+import type { SafeApiError } from '../types/safe-api-error.type.js';
 
 export const SAFE_API_ERRORS: Record<number, SafeApiError> = {
   400: { code: 'BAD_REQUEST', message: 'The request is invalid.' },

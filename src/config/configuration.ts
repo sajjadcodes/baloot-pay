@@ -3,8 +3,8 @@ import {
   INVALID_PORT_MESSAGE,
   MAX_PORT,
   MIN_PORT,
-} from '../common/constants/application.constants';
-import { PORT_PATTERN } from '../common/constants/regex.constants';
+} from '../common/constants/application.constants.js';
+import { PORT_PATTERN } from '../common/constants/regex.constants.js';
 
 export interface AppConfiguration {
   port: number;

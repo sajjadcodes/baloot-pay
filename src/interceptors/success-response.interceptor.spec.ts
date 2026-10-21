@@ -1,10 +1,11 @@
 import { CallHandler, ExecutionContext } from '@nestjs/common';
+import { jest } from '@jest/globals';
 import type { Response } from 'express';
 import { of } from 'rxjs';
-import { HTTP_STATUS } from '../common/constants/http.constants';
-import { SUCCESS_RESPONSE_MESSAGE } from '../common/constants/application.constants';
-import type { SuccessResponse } from '../common/types/success-response.interface';
-import { SuccessResponseInterceptor } from './success-response.interceptor';
+import { HTTP_STATUS } from '../common/constants/http.constants.js';
+import { SUCCESS_RESPONSE_MESSAGE } from '../common/constants/application.constants.js';
+import type { SuccessResponse } from '../common/types/success-response.interface.js';
+import { SuccessResponseInterceptor } from './success-response.interceptor.js';
 
 describe('SuccessResponseInterceptor', () => {
   function createContext(response: Partial<Response>): ExecutionContext {

@@ -10,9 +10,12 @@ import {
   INTERNAL_ERROR,
   REQUEST_FAILED_ERROR,
   SAFE_API_ERRORS,
-} from '../common/constants/api-error.constants';
-import { HTTP_HEADERS, HTTP_STATUS } from '../common/constants/http.constants';
-import type { ApiErrorResponse } from '../common/types/api-error-response.interface';
+} from '../common/constants/api-error.constants.js';
+import {
+  HTTP_HEADERS,
+  HTTP_STATUS,
+} from '../common/constants/http.constants.js';
+import type { ApiErrorResponse } from '../common/types/api-error-response.interface.js';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {

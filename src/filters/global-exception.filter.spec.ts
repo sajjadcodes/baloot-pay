@@ -1,19 +1,22 @@
 import { ArgumentsHost, HttpException, Logger } from '@nestjs/common';
+import { jest } from '@jest/globals';
 import type { Response } from 'express';
-import { GlobalExceptionFilter } from './global-exception.filter';
+import { GlobalExceptionFilter } from './global-exception.filter.js';
 
 describe('GlobalExceptionFilter', () => {
   let filter: GlobalExceptionFilter;
   let response: Pick<Response, 'getHeader' | 'status' | 'json'>;
-  let status: jest.Mock;
-  let json: jest.Mock;
+  let status: jest.Mock<Response['status']>;
+  let json: jest.Mock<Response['json']>;
 
   beforeEach(() => {
     filter = new GlobalExceptionFilter();
-    json = jest.fn();
-    status = jest.fn().mockReturnThis();
+    json = jest.fn<Response['json']>();
+    status = jest.fn<Response['status']>().mockReturnThis();
     response = {
-      getHeader: jest.fn().mockReturnValue('request-123'),
+      getHeader: jest
+        .fn<Response['getHeader']>()
+        .mockReturnValue('request-123'),
       status,
       json,
     };
@@ -45,7 +48,7 @@ describe('GlobalExceptionFilter', () => {
   it('does not expose unexpected exception details and logs the error type', () => {
     const loggerError = jest
       .spyOn(Logger.prototype, 'error')
-      .mockImplementation();
+      .mockImplementation(() => undefined);
 
     try {
       filter.catch(new Error('sensitive provider response'), createHost());

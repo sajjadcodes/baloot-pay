@@ -3,7 +3,7 @@ import type { NextFunction, Request, Response } from 'express';
 import {
   HTTP_HEADERS,
   HTTP_HEADER_VALUES,
-} from '../common/constants/http.constants';
+} from '../common/constants/http.constants.js';
 
 // Give each request a server-owned correlation ID and safe defaults for
 // responses that may contain sensitive payment data.

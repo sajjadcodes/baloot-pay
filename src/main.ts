@@ -1,10 +1,10 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { configureBodyParsers } from './common/http/configure-body-parsers';
-import { validateConfiguration } from './config/configuration';
-import { GlobalExceptionFilter } from './filters/global-exception.filter';
-import { SuccessResponseInterceptor } from './interceptors/success-response.interceptor';
-import { RequestContextMiddleware } from './middleware/request-context.middleware';
+import { AppModule } from './app.module.js';
+import { configureBodyParsers } from './common/http/configure-body-parsers.js';
+import { validateConfiguration } from './config/configuration.js';
+import { GlobalExceptionFilter } from './filters/global-exception.filter.js';
+import { SuccessResponseInterceptor } from './interceptors/success-response.interceptor.js';
+import { RequestContextMiddleware } from './middleware/request-context.middleware.js';
 
 async function bootstrap() {
   const configuration = validateConfiguration(process.env);

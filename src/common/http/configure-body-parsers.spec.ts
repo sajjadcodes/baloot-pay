@@ -1,10 +1,11 @@
 import type { INestApplication } from '@nestjs/common';
-import { REQUEST_BODY_LIMIT } from '../constants/http.constants';
-import { configureBodyParsers } from './configure-body-parsers';
+import { jest } from '@jest/globals';
+import { REQUEST_BODY_LIMIT } from '../constants/http.constants.js';
+import { configureBodyParsers } from './configure-body-parsers.js';
 
 describe('configureBodyParsers', () => {
   it('registers JSON and URL-encoded parsers with the request size limit', () => {
-    const use = jest.fn<void, [handler: unknown]>();
+    const use = jest.fn<(handler: unknown) => void>();
     const app = { use } as unknown as INestApplication;
 
     configureBodyParsers(app);

@@ -1,10 +1,11 @@
 import type { NextFunction, Request, Response } from 'express';
+import { jest } from '@jest/globals';
 import {
   HTTP_HEADERS,
   HTTP_HEADER_VALUES,
-} from '../common/constants/http.constants';
-import { UUID_V4_PATTERN } from '../common/constants/regex.constants';
-import { RequestContextMiddleware } from './request-context.middleware';
+} from '../common/constants/http.constants.js';
+import { UUID_V4_PATTERN } from '../common/constants/regex.constants.js';
+import { RequestContextMiddleware } from './request-context.middleware.js';
 
 describe('RequestContextMiddleware', () => {
   it('generates a server-owned request ID and sets API security headers', () => {
@@ -13,7 +14,7 @@ describe('RequestContextMiddleware', () => {
         [HTTP_HEADERS.requestId.toLowerCase()]: 'caller-controlled',
       },
     } as unknown as Request;
-    const setHeader = jest.fn<void, [name: string, value: string]>();
+    const setHeader = jest.fn<(name: string, value: string) => void>();
     const response = { setHeader } as unknown as Response;
     const next = jest.fn() as NextFunction;
 
@@ -51,8 +52,8 @@ describe('RequestContextMiddleware', () => {
   it('generates a distinct request ID for each request', () => {
     const middleware = new RequestContextMiddleware();
     const request = { headers: {} } as unknown as Request;
-    const setHeaderA = jest.fn<void, [name: string, value: string]>();
-    const setHeaderB = jest.fn<void, [name: string, value: string]>();
+    const setHeaderA = jest.fn<(name: string, value: string) => void>();
+    const setHeaderB = jest.fn<(name: string, value: string) => void>();
     const responseA = { setHeader: setHeaderA } as unknown as Response;
     const responseB = { setHeader: setHeaderB } as unknown as Response;
 
