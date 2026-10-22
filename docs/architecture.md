@@ -56,7 +56,7 @@ Every module and abstraction must serve a documented business or engineering req
 | Validation | NestJS-compatible DTO validation | Input validation and strict request schemas |
 | Authentication | Existing deployed multi-tenant authentication service; Baloot Pay validates its documented identity contract and enforces local resource authorization |
 | Background processing | Durable queue or PostgreSQL-backed work queue | Asynchronous workflows and retries |
-| Testing | Jest and HTTP integration testing | Unit, integration and end-to-end verification |
+| Testing | Jest | Colocated unit tests; persistence verification strategy requires separate approval |
 | API protection | Rate limiting, throttling and abuse controls | Resource and business-flow protection |
 | Observability | Structured logs, metrics and distributed tracing | Operational diagnosis |
 | Containers | Docker | Consistent build and deployment environments |
@@ -237,49 +237,30 @@ baloot-pay/
 │   ├── main.ts
 │   ├── app.module.ts
 │   ├── config/
-│   │   ├── configuration.ts
-│   │   ├── env.validation.ts
-│   │   └── configuration.module.ts
 │   ├── common/
 │   │   ├── constants/
 │   │   ├── types/
 │   │   ├── errors/
-│   │   ├── validation/
-│   │   ├── logging/
-│   │   ├── security/
-│   │   └── observability/
-│   ├── modules/
-│   │   ├── tenants/
-│   │   │   ├── domain/
-│   │   │   ├── application/
-│   │   │   ├── infrastructure/
-│   │   │   └── presentation/
+│   │   └── utils/
+│   ├── domains/
 │   │   ├── payments/
-│   │   ├── payment-providers/
-│   │   │   ├── contracts/
-│   │   │   ├── registry/
-│   │   │   └── adapters/
-│   │   ├── refunds/
+│   │   │   ├── payments.module.ts
+│   │   │   ├── payments.controller.ts
+│   │   │   ├── payments.service.ts
+│   │   │   └── *.spec.ts
 │   │   ├── webhooks/
-│   │   ├── idempotency/
-│   │   ├── transaction-events/
-│   │   ├── outbox/
-│   │   ├── reconciliation/
-│   │   ├── audit/
-│   │   └── health/
-│   ├── workers/
-│   └── database/
+│   │   │   ├── webhooks.module.ts
+│   │   │   ├── webhooks.controller.ts
+│   │   │   ├── webhooks.service.ts
+│   │   │   └── *.spec.ts
+│   │   └── idempotency/
+│   ├── prisma/
+│   │   └── contract.prisma
+│   └── workers/
 ├── prisma/
 │   ├── schema.prisma
 │   ├── migrations/
 │   └── seed.ts
-├── test/
-│   ├── unit/
-│   ├── integration/
-│   ├── e2e/
-│   ├── contract/
-│   ├── security/
-│   └── fixtures/
 ├── docs/
 │   ├── architecture/
 │   ├── decisions/
@@ -298,7 +279,18 @@ baloot-pay/
 └── package.json
 ```
 
-Do not create every directory as an empty placeholder. Introduce each module when its corresponding roadmap phase begins.
+Treat the structure as a guide, not a request to create empty placeholders.
+Introduce each domain folder when its implementation increment begins. Place
+each domain's NestJS module, controller, and service in that domain folder as
+applicable. Put shared utilities in separate files under
+`src/common/utils/`.
+
+This repository currently uses unit tests only, colocated with the code as
+`*.spec.ts`. Add unit tests for controllers, services, and complex helpers or
+utilities. Do not add e2e tests unless the owner approves changing this
+convention. Database behavior and concurrency guarantees will still require
+an approved isolated test strategy before persistence can be considered
+complete.
 
 Each business module should have a clear public interface. Other modules must not reach into its private implementation or access its tables without a documented reason.
 

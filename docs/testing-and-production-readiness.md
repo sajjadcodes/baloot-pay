@@ -2,6 +2,15 @@
 
 Tests must validate business behavior, security properties, and failure recovery.
 
+## Repository test convention
+
+Baloot Pay currently uses unit tests only, colocated with the relevant code as
+`*.spec.ts`. Add unit tests for controllers, services, and complex shared
+helpers/utilities. Do not add e2e tests unless the owner approves changing this
+convention. Tests involving PostgreSQL, provider sandboxes, or other external
+systems require a separately approved isolated test strategy; never point
+tests at shared or production infrastructure.
+
 ## 14.1 Unit tests
 
 Test:
@@ -18,11 +27,14 @@ Test:
 
 Domain tests should not require a running database or external payment provider.
 
-## 14.2 Integration tests
+## 14.2 Future persistence verification (approval required)
 
-Use a real disposable PostgreSQL instance or an equivalent isolated database environment for critical persistence tests.
+Persistence and concurrency guarantees cannot be established by mocks alone.
+Before adding database tests or integration tooling, agree on an isolated
+disposable PostgreSQL environment and approve its lifecycle and exact
+schema-changing commands. Never use shared or production databases.
 
-Test:
+When approved, verify:
 
 - Prisma queries and constraints.
 - Migration correctness.
@@ -36,22 +48,7 @@ Test:
 
 Mocks alone are insufficient to verify database concurrency guarantees.
 
-## 14.3 End-to-end tests
-
-Test complete workflows:
-
-1. Create a payment.
-2. Submit it to a simulated provider.
-3. Receive a verified provider event.
-4. Update the payment state.
-5. Retrieve the payment.
-6. Request a refund.
-7. Receive the refund outcome.
-8. Reconcile the resulting records.
-
-Also test rejected payments, authentication failures, duplicate requests, timeouts, and provider outages.
-
-## 14.4 Mandatory adversarial scenarios
+## 14.3 Mandatory adversarial scenarios
 
 - The same payment request arrives concurrently multiple times.
 - The same idempotency key is reused with a different amount.
@@ -70,16 +67,18 @@ Also test rejected payments, authentication failures, duplicate requests, timeou
 
 Every discovered financial or security bug should produce a regression test.
 
-## 14.5 Testing rules
+## 14.4 Testing rules
 
 - Do not use real payment credentials in automated tests.
 - Use provider sandboxes or deterministic provider simulators.
 - Never weaken production validation to simplify testing.
 - Do not mark a phase complete while its critical tests fail.
+- Before every commit request, run `pnpm build`, `pnpm test`, and
+  `pnpm exec tsc --noEmit`; all must pass.
 - Track flaky tests instead of silently skipping them.
 - Use property-based testing where it meaningfully strengthens money, state-machine, and concurrency invariants.
 
-## 14.6 Load, stress, and resilience testing
+## 14.5 Load, stress, and resilience testing
 
 Load testing is a release qualification activity, not a substitute for correctness tests. Define measurable traffic, latency, availability, and error-budget objectives before selecting pass/fail thresholds. Do not invent a single requests-per-second target and treat it as production capacity.
 
@@ -97,7 +96,7 @@ Run and retain results for:
 
 Acceptance criteria must include both performance and correctness: no duplicate logical operations or unsafe duplicate charges, no cross-tenant disclosure, no lost durable work, no invalid state transitions, and no unbounded resource/queue growth. A fast response with an incorrect financial result is a failed test.
 
-## 14.7 Security and abuse testing
+## 14.6 Security and abuse testing
 
 For each protected API, test unauthenticated and unauthorized access, incorrect scopes, revoked credentials, tenant-ID tampering, cross-tenant object IDs, mass assignment, malformed and oversized payloads, injection-shaped input, pagination/filter abuse, and rate-limit behavior. Verify errors do not disclose secrets, stack traces, provider internals, or another tenant's data.
 

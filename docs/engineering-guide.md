@@ -19,17 +19,41 @@ For every implementation request:
 3. Identify the exact roadmap phase and checklist items being implemented.
 4. Identify affected modules, database models, API contracts, and security boundaries.
 5. State any important assumptions or unresolved decisions.
-6. Propose a small implementation plan.
-7. Implement only the requested scope.
-8. Add or update tests alongside the implementation.
-9. Run the relevant tests, linting, type checking, and build.
+6. Propose one small implementation increment and identify the exact files it will touch.
+7. Implement only the approved increment.
+8. Add or update unit tests alongside controllers, services, and non-trivial helpers/utilities. This repository uses unit tests only; do not add e2e tests unless the user changes this convention.
+9. Run `pnpm build`, `pnpm test`, and `pnpm exec tsc --noEmit`. All three must pass before asking to commit. Run relevant lint/format checks as appropriate.
 10. Review the changes for financial correctness and security regressions.
-11. Update the relevant roadmap checkboxes and documentation.
-12. Report what changed, what was tested, the actual results, and what remains incomplete.
+11. Update only roadmap checkboxes whose completion is supported by the verified implementation or user-confirmed decisions.
+12. Stage only the exact files in the increment, summarize the staged diff and test results, and stop for user review. Do not commit until the user explicitly confirms.
 
 Do not implement all phases in one request.
 
 Do not mark a checklist item complete merely because files have been generated.
+
+### Repository structure
+
+Place business domains under `src/domains/`, with one folder per bounded area
+(for example `payments/`, `webhooks/`, and `idempotency/`). Each domain owns
+its NestJS module, controller, and service as applicable; keep controllers
+thin and services focused on use cases. Put shared helpers in separate,
+appropriately named files under `src/common/utils/`. Do not create a new
+directory layout or add placeholder folders without the user's approval.
+
+### Micro-commit and review workflow
+
+- Work in one independently reviewable task at a time.
+- After implementation and verification, stage only that task's files and
+  present the staged changes for review. Do not commit yet.
+- Create a commit only after the user confirms the staged increment.
+- Commit messages must describe the change in plain prose, with a useful
+  subject and a non-bulleted description. Never mention Copilot or AI authorship.
+- Keep `src/prisma/contract.prisma` and any migration files generated from or
+  implementing that contract in the same proposed/staged increment and
+  commit. Do not stage either separately.
+- Never run Prisma contract emission, migrations, schema synchronization, or
+  any other schema-changing operation until the user confirms the exact
+  operation, target, and expected effect.
 
 ## 17.3 Required behavior for ambiguous requirements
 

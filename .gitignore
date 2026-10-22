@@ -45,6 +45,9 @@ lerna-debug.log*
 # temp directory
 .tmp
 
+# Local implementation roadmap
+/docs/implementation-roadmap.md
+
 # Runtime data
 pids
 *.pid
