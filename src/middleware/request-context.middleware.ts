@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { Logger } from '@nestjs/common';
 import type { NextFunction, Request, Response } from 'express';
 import {
   HTTP_HEADERS,
@@ -8,8 +9,23 @@ import {
 // Give each request a server-owned correlation ID and safe defaults for
 // responses that may contain sensitive payment data.
 export class RequestContextMiddleware {
-  use = (_request: Request, response: Response, next: NextFunction): void => {
+  private readonly logger = new Logger(RequestContextMiddleware.name);
+
+  use = (request: Request, response: Response, next: NextFunction): void => {
+    const startTime = process.hrtime.bigint();
     const requestId = randomUUID();
+
+    response.on('finish', () => {
+      const routePath = (request.route as { path?: unknown } | undefined)?.path;
+      this.logger.log({
+        event: 'http.request.completed',
+        method: request.method,
+        route: typeof routePath === 'string' ? routePath : 'unmatched',
+        statusCode: response.statusCode,
+        durationMs: Number(process.hrtime.bigint() - startTime) / 1_000_000,
+        requestId,
+      });
+    });
 
     // Lets clients and operators correlate this request without trusting a caller-supplied ID.
     response.setHeader(HTTP_HEADERS.requestId, requestId);

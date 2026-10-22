@@ -47,9 +47,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     if (statusCode >= HTTP_STATUS.internalServerError) {
       const errorType =
         exception instanceof Error ? exception.name : typeof exception;
-      this.logger.error(
-        `Request failed with ${errorType}; requestId=${requestId ?? 'unavailable'}`,
-      );
+      this.logger.error({
+        event: 'http.request.failed',
+        errorType,
+        requestId: requestId ?? 'unavailable',
+      });
     }
 
     // Keep the response shape stable for client handling and API documentation.

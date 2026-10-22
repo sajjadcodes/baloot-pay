@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import type { NextFunction, Request, Response } from 'express';
 import { jest } from '@jest/globals';
 import {
@@ -15,7 +16,10 @@ describe('RequestContextMiddleware', () => {
       },
     } as unknown as Request;
     const setHeader = jest.fn<(name: string, value: string) => void>();
-    const response = { setHeader } as unknown as Response;
+    const response = {
+      setHeader,
+      on: jest.fn(),
+    } as unknown as Response;
     const next = jest.fn() as NextFunction;
 
     new RequestContextMiddleware().use(request, response, next);
@@ -54,8 +58,14 @@ describe('RequestContextMiddleware', () => {
     const request = { headers: {} } as unknown as Request;
     const setHeaderA = jest.fn<(name: string, value: string) => void>();
     const setHeaderB = jest.fn<(name: string, value: string) => void>();
-    const responseA = { setHeader: setHeaderA } as unknown as Response;
-    const responseB = { setHeader: setHeaderB } as unknown as Response;
+    const responseA = {
+      setHeader: setHeaderA,
+      on: jest.fn(),
+    } as unknown as Response;
+    const responseB = {
+      setHeader: setHeaderB,
+      on: jest.fn(),
+    } as unknown as Response;
 
     middleware.use(request, responseA, jest.fn());
     middleware.use(request, responseB, jest.fn());
@@ -68,5 +78,52 @@ describe('RequestContextMiddleware', () => {
     )?.[1];
 
     expect(requestIdA).not.toBe(requestIdB);
+  });
+
+  it('logs completed requests as structured metadata without request secrets', () => {
+    const loggerLog = jest
+      .spyOn(Logger.prototype, 'log')
+      .mockImplementation(() => undefined);
+    let onFinish: (() => void) | undefined;
+    const setHeader = jest.fn<(name: string, value: string) => void>();
+    const response = {
+      setHeader,
+      getHeader: jest.fn().mockReturnValue('request-456'),
+      on: jest.fn((_event: string, listener: () => void) => {
+        onFinish = listener;
+      }),
+      statusCode: 200,
+    } as unknown as Response;
+    const request = {
+      method: 'GET',
+      route: { path: '/api/payments/:id' },
+      originalUrl: '/api/payments/123?token=secret',
+      headers: { authorization: 'Bearer secret' },
+      body: { cardNumber: '4111111111111111' },
+    } as unknown as Request;
+
+    try {
+      new RequestContextMiddleware().use(request, response, jest.fn());
+      onFinish?.();
+      const requestId = setHeader.mock.calls.find(
+        ([name]) => name === HTTP_HEADERS.requestId,
+      )?.[1];
+
+      expect(loggerLog).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: 'http.request.completed',
+          method: 'GET',
+          route: '/api/payments/:id',
+          statusCode: 200,
+          requestId,
+        }),
+      );
+      expect(JSON.stringify(loggerLog.mock.calls)).not.toContain('secret');
+      expect(JSON.stringify(loggerLog.mock.calls)).not.toContain(
+        '4111111111111111',
+      );
+    } finally {
+      loggerLog.mockRestore();
+    }
   });
 });

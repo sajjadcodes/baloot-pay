@@ -60,9 +60,11 @@ describe('GlobalExceptionFilter', () => {
         message: 'An unexpected error occurred.',
         requestId: 'request-123',
       });
-      expect(loggerError).toHaveBeenCalledWith(
-        'Request failed with Error; requestId=request-123',
-      );
+      expect(loggerError).toHaveBeenCalledWith({
+        event: 'http.request.failed',
+        errorType: 'Error',
+        requestId: 'request-123',
+      });
       expect(JSON.stringify(json.mock.calls[0])).not.toContain(
         'sensitive provider response',
       );

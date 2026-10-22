@@ -1,3 +1,4 @@
+import { ConsoleLogger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
 import { configureBodyParsers } from './common/http/configure-body-parsers.js';
@@ -8,7 +9,10 @@ import { RequestContextMiddleware } from './middleware/request-context.middlewar
 
 async function bootstrap() {
   const configuration = validateConfiguration(process.env);
-  const app = await NestFactory.create(AppModule, { bodyParser: false });
+  const app = await NestFactory.create(AppModule, {
+    bodyParser: false,
+    logger: new ConsoleLogger({ json: true, compact: true }),
+  });
   app.use(new RequestContextMiddleware().use);
   configureBodyParsers(app);
   app.useGlobalFilters(new GlobalExceptionFilter());
