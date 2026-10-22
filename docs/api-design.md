@@ -1,24 +1,30 @@
 # 10. API Design
 
-Use a versioned REST API unless a documented requirement justifies another protocol.
+Use an unversioned REST API unless a documented requirement justifies another protocol.
 
 Suggested initial endpoints:
 
 | Method | Endpoint | Purpose |
 |---|---|---|
-| POST | `/api/v1/payments` | Create a payment |
-| GET | `/api/v1/payments/:id` | Retrieve a payment |
-| POST | `/api/v1/payments/:id/confirm` | Continue a supported payment flow |
-| POST | `/api/v1/payments/:id/capture` | Capture an authorized payment |
-| POST | `/api/v1/payments/:id/cancel` | Cancel a cancellable payment |
-| POST | `/api/v1/payments/:id/refunds` | Create a refund request |
-| GET | `/api/v1/payments/:id/refunds` | List refunds associated with a payment |
-| GET | `/api/v1/refunds/:id` | Retrieve a refund |
-| GET | `/api/v1/transactions` | Query authorized transaction records |
-| GET | `/api/v1/health/live` | Process liveness |
-| GET | `/api/v1/health/ready` | Dependency readiness |
+| POST | `/api/payments` | Create a payment |
+| GET | `/api/payments/:id` | Retrieve a payment |
+| POST | `/api/payments/:id/confirm` | Continue a supported payment flow |
+| POST | `/api/payments/:id/capture` | Capture an authorized payment |
+| POST | `/api/payments/:id/cancel` | Cancel a cancellable payment |
+| POST | `/api/payments/:id/refunds` | Create a refund request |
+| GET | `/api/payments/:id/refunds` | List refunds associated with a payment |
+| GET | `/api/refunds/:id` | Retrieve a refund |
+| GET | `/api/transactions` | Query authorized transaction records |
+| GET | `/api/health/live` | Process liveness |
+| GET | `/api/health/ready` | Dependency readiness |
 
 Only expose operations supported by the configured provider and approved product scope.
+
+`/api/health/live` reports only whether the process can respond. It does not
+prove that the database, authentication service, or payment provider is ready.
+Add `/api/health/ready` only alongside explicit checks for required runtime
+dependencies; it must return unavailable when a required dependency is not
+ready.
 
 Provider webhooks should use separate, provider-specific routes or a carefully designed routing mechanism with independent signature verification.
 
