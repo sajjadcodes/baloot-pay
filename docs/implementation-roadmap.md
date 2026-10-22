@@ -64,6 +64,10 @@ Before an increment is considered complete:
 
 **Objective:** Resolve the decisions that would otherwise cause expensive architectural mistakes.
 
+**AWS handoff status (owner-reported, 2026-10-23; not independently verified):** Baloot Auth is reported deployed on a shared Amazon Linux EC2 host in `us-east-1`, managed by Session Manager, with Caddy and a private RDS PostgreSQL instance. Auth's service is reported on loopback port `3000`; host memory was approximately 1.9 GiB and the prior swap file was absent after restart. Baloot Pay and its database, roles, secrets, DNS, and deployment were not inspected or confirmed. Revalidate the live environment before changes. The handoff does not resolve whether Pay will share the existing RDS instance or use a separate instance, nor does it approve provisioning or deployment.
+
+See the [AWS deployment guide](aws-deployment.md) for the handoff details and operational checks.
+
 Tasks:
 
 - [ ] Inspect the existing repository and identify its current state.
@@ -80,7 +84,7 @@ Tasks:
 - [ ] Define the intended card-data handling model.
 - [ ] Verify Prisma 8, PostgreSQL, Node.js, and NestJS compatibility using their official version-specific documentation.
 - [x] Decide to use one dedicated logical database for Baloot Auth and a separate dedicated logical database for Baloot Pay, with separate database roles and credentials and no cross-service database access.
-- [ ] Define the AWS RDS for PostgreSQL infrastructure model: private networking and TLS, runtime versus migration credentials, backup and recovery, and whether the two databases share one RDS instance or use separate instances based on accepted isolation, cost, and availability requirements.
+- [ ] Define the AWS RDS for PostgreSQL infrastructure model: verify private networking and TLS, define Pay runtime versus migration credentials, backup and recovery, and decide whether Pay shares the existing Auth RDS instance or uses a separate instance based on accepted isolation, cost, and availability requirements.
 - [ ] Define the EC2 deployment boundary for Auth and Pay, including separate processes/containers and configuration, secret delivery, instance metadata protections, host hardening, and the risk accepted while both services share one host.
 - [ ] Identify PCI DSS, privacy, and other compliance questions requiring expert confirmation.
 - [ ] Write initial architecture decision records in `docs/decisions/`.

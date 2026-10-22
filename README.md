@@ -20,6 +20,7 @@ The detailed product, engineering, payment-safety, and operational guidance is o
 | [API design](docs/api-design.md) | Endpoints, validation, authorization, errors, and pagination |
 | [Security architecture](docs/security.md) | Authentication, tenant isolation, card-data handling, and secure development |
 | [Reliability and operations](docs/reliability-and-operations.md) | Outbox/inbox, retries, reconciliation, observability, and deployment |
+| [AWS deployment](docs/aws-deployment.md) | Current Auth/Pay infrastructure handoff, deployment boundaries, and AWS operations checklist |
 | [Implementation roadmap](docs/implementation-roadmap.md) | Phases, tasks, and completion gates |
 | [Testing and production readiness](docs/testing-and-production-readiness.md) | Test strategy, definition of done, and production checklist |
 | [Engineering guide](docs/engineering-guide.md) | AI coding-agent workflow and documentation standards |
