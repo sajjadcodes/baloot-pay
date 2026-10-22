@@ -247,12 +247,14 @@ baloot-pay/
 │   │   │   ├── payments.module.ts
 │   │   │   ├── payments.controller.ts
 │   │   │   ├── payments.service.ts
-│   │   │   └── *.spec.ts
+│   │   │   ├── payments.service.spec.ts
+│   │   │   └── payments.controller.spec.ts
 │   │   ├── webhooks/
 │   │   │   ├── webhooks.module.ts
 │   │   │   ├── webhooks.controller.ts
 │   │   │   ├── webhooks.service.ts
-│   │   │   └── *.spec.ts
+│   │   │   ├── webhooks.service.spec.ts
+│   │   │   └── webhooks.controller.spec.ts
 │   │   └── idempotency/
 │   ├── prisma/
 │   │   └── contract.prisma
@@ -285,10 +287,11 @@ each domain's NestJS module, controller, and service in that domain folder as
 applicable. Put shared utilities in separate files under
 `src/common/utils/`.
 
-This repository currently uses unit tests only, colocated with the code as
-`*.spec.ts`. Add unit tests for controllers, services, and complex helpers or
-utilities. Do not add e2e tests unless the owner approves changing this
-convention. Database behavior and concurrency guarantees will still require
+This repository currently uses unit tests only. Keep each `*.spec.ts` beside
+the exact controller, service, or helper/utility file it tests; do not gather
+tests in a separate directory. Add unit tests for controllers, services, and
+complex helpers or utilities. Do not add e2e tests unless the owner approves
+changing this convention. Database behavior and concurrency guarantees will still require
 an approved isolated test strategy before persistence can be considered
 complete.
 

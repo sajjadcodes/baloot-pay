@@ -21,7 +21,7 @@ For every implementation request:
 5. State any important assumptions or unresolved decisions.
 6. Propose one small implementation increment and identify the exact files it will touch.
 7. Implement only the approved increment.
-8. Add or update unit tests alongside controllers, services, and non-trivial helpers/utilities. This repository uses unit tests only; do not add e2e tests unless the user changes this convention.
+8. Add or update unit tests in the same folder as the implementation file they test, using a sibling name such as `payments.service.spec.ts` beside `payments.service.ts` or `amount.spec.ts` beside `amount.ts`. This repository uses unit tests only; do not add e2e tests unless the user changes this convention.
 9. Run `pnpm build`, `pnpm test`, and `pnpm exec tsc --noEmit`. All three must pass before asking to commit. Run relevant lint/format checks as appropriate.
 10. Review the changes for financial correctness and security regressions.
 11. Update only roadmap checkboxes whose completion is supported by the verified implementation or user-confirmed decisions.
@@ -39,6 +39,9 @@ its NestJS module, controller, and service as applicable; keep controllers
 thin and services focused on use cases. Put shared helpers in separate,
 appropriately named files under `src/common/utils/`. Do not create a new
 directory layout or add placeholder folders without the user's approval.
+Place each unit test as a sibling of the exact implementation file it covers;
+for example, `payments.service.spec.ts` belongs beside `payments.service.ts`,
+not in a separate test directory.
 
 ### Micro-commit and review workflow
 

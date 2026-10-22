@@ -4,10 +4,12 @@ Tests must validate business behavior, security properties, and failure recovery
 
 ## Repository test convention
 
-Baloot Pay currently uses unit tests only, colocated with the relevant code as
-`*.spec.ts`. Add unit tests for controllers, services, and complex shared
-helpers/utilities. Do not add e2e tests unless the owner approves changing this
-convention. Tests involving PostgreSQL, provider sandboxes, or other external
+Baloot Pay currently uses unit tests only. Put each `*.spec.ts` in the same
+folder as the exact implementation file it tests; for example,
+`payments.service.spec.ts` beside `payments.service.ts`. Do not collect unit
+tests in a separate test directory. Add unit tests for controllers, services,
+and complex shared helpers/utilities. Do not add e2e tests unless the owner
+approves changing this convention. Tests involving PostgreSQL, provider sandboxes, or other external
 systems require a separately approved isolated test strategy; never point
 tests at shared or production infrastructure.
 
