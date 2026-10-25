@@ -51,12 +51,15 @@ not in a separate test directory.
 - Create a commit only after the user confirms the staged increment.
 - Commit messages must describe the change in plain prose, with a useful
   subject and a non-bulleted description. Never mention Copilot or AI authorship.
-- Keep `src/prisma/contract.prisma` and any migration files generated from or
-  implementing that contract in the same proposed/staged increment and
-  commit. Do not stage either separately.
-- Never run Prisma contract emission, migrations, schema synchronization, or
-  any other schema-changing operation until the user confirms the exact
-  operation, target, and expected effect.
+- Keep `src/prisma/contract.prisma` and the owner's corresponding migration
+  files together in the same proposed/staged increment and commit. Do not
+  stage either separately.
+- The owner alone creates or edits migration files and runs migration or
+  schema-changing commands. The agent must not generate migration files or
+  run migrations, contract emission, schema synchronization, or other
+  schema-changing operations. When a schema change requires one of these
+  steps, explain the exact command, target, expected effect, and risks, then
+  wait for the owner to perform it and provide the result.
 
 ## 17.3 Required behavior for ambiguous requirements
 
